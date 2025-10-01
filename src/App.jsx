@@ -55,7 +55,10 @@ const CreateStreamForm = ({ handleSchedule, isScheduling }) => {
                 <div>
                     <label htmlFor="videoIdentifier" className="block text-sm font-medium text-gray-300 mb-1">Tên file Video <span className="text-red-400">*</span></label>
                     <input type="text" id="videoIdentifier" value={formState.videoIdentifier} onChange={handleChange} placeholder="VD: my_video_01.mp4" className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
-                </div>
+					<p className="mt-1 text-xs text-yellow-400">
+                        Tên video ở đường dẫn **D:\Live\videos** trên máy chủ.
+                    </p>
+				</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">Ngày Phát <span className="text-red-400">*</span></label>
