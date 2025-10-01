@@ -28,54 +28,176 @@ const CreateStreamForm = ({ handleSchedule, isScheduling }) => {
         date: new Date().toISOString().split('T')[0],
         time: new Date().toTimeString().slice(0, 5),
         streamKey: '', rtmpServer: 'rtmp://a.rtmp.youtube.com/live2',
-        isDurationCustom: false, duration: 60,
+        durationType: 'infinite', duration: 60,
     });
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { id, value } = e.target;
         setFormState(prev => ({ ...prev, [id]: value }));
+        if (errors[id]) {
+            setErrors(prev => ({ ...prev, [id]: '' }));
+        }
+    };
+
+    const handleDurationTypeChange = (e) => {
+        setFormState(prev => ({ ...prev, durationType: e.target.value }));
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formState.title.trim()) newErrors.title = 'Vui lòng nhập tiêu đề';
+        if (!formState.videoIdentifier.trim()) newErrors.videoIdentifier = 'Vui lòng nhập tên file video';
+        if (!formState.date) newErrors.date = 'Vui lòng chọn ngày phát';
+        if (!formState.time) newErrors.time = 'Vui lòng chọn giờ phát';
+        if (!formState.rtmpServer.trim()) newErrors.rtmpServer = 'Vui lòng nhập RTMP Server';
+        if (!formState.streamKey.trim()) newErrors.streamKey = 'Vui lòng nhập Stream Key';
+        if (formState.durationType === 'custom' && (!formState.duration || formState.duration <= 0)) {
+            newErrors.duration = 'Vui lòng nhập thời lượng hợp lệ';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        if (!validateForm()) {
+            toast.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
+            return;
+        }
+        
         handleSchedule(formState);
         setFormState(prev => ({ ...prev, title: '', videoIdentifier: '', streamKey: '' }));
+        setErrors({});
     };
 
     return (
         <div className="bg-gray-800 rounded-lg p-6 h-full flex flex-col border border-gray-700">
             <h2 className="text-xl font-bold text-gray-100 flex items-center border-b border-gray-700 pb-4 flex-shrink-0">
-                <Plus className="w-6 h-6 mr-3 text-blue-400" /> Đặt Lịch Livestream Mới
+                <Plus className="w-6 h-6 mr-3 text-blue-400" /> Lập Lịch Livestream Mới
             </h2>
             <div className="space-y-4 overflow-y-auto pr-2 flex-1 mt-4">
                 <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">Tiêu đề <span className="text-red-400">*</span></label>
-                    <input type="text" id="title" value={formState.title} onChange={handleChange} placeholder="VD: Tiêu đề livestream mới" className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
+                    <input 
+                        type="text" 
+                        id="title" 
+                        value={formState.title} 
+                        onChange={handleChange} 
+                        placeholder="VD: Livestream sự kiện 2025" 
+                        className={`w-full px-3 py-2 border ${errors.title ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+                    />
+                    {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
                 <div>
                     <label htmlFor="videoIdentifier" className="block text-sm font-medium text-gray-300 mb-1">Tên file Video <span className="text-red-400">*</span></label>
-                    <input type="text" id="videoIdentifier" value={formState.videoIdentifier} onChange={handleChange} placeholder="VD: my_video_01.mp4" className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
-					<p className="mt-1 text-xs text-yellow-400">
-                        Tên video ở đường dẫn **D:\Live\videos** trên máy chủ.
-                    </p>
-				</div>
+                    <input 
+                        type="text" 
+                        id="videoIdentifier" 
+                        value={formState.videoIdentifier} 
+                        onChange={handleChange} 
+                        placeholder="VD: my_video_01.mp4" 
+                        className={`w-full px-3 py-2 border ${errors.videoIdentifier ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+                    />
+                    {errors.videoIdentifier && <p className="text-red-400 text-xs mt-1">{errors.videoIdentifier}</p>}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">Ngày Phát <span className="text-red-400">*</span></label>
-                        <input type="date" id="date" value={formState.date} onChange={handleChange} className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
+                        <input 
+                            type="date" 
+                            id="date" 
+                            value={formState.date} 
+                            onChange={handleChange} 
+                            className={`w-full px-3 py-2 border ${errors.date ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+                        />
+                        {errors.date && <p className="text-red-400 text-xs mt-1">{errors.date}</p>}
                     </div>
                     <div>
                         <label htmlFor="time" className="block text-sm font-medium text-gray-300 mb-1">Giờ Phát <span className="text-red-400">*</span></label>
-                        <input type="time" id="time" value={formState.time} onChange={handleChange} className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
+                        <input 
+                            type="time" 
+                            id="time" 
+                            value={formState.time} 
+                            onChange={handleChange} 
+                            className={`w-full px-3 py-2 border ${errors.time ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+                        />
+                        {errors.time && <p className="text-red-400 text-xs mt-1">{errors.time}</p>}
                     </div>
                 </div>
-                <div>
-                    <label htmlFor="rtmpServer" className="block text-sm font-medium text-gray-300 mb-1">RTMP Server <span className="text-red-400">*</span></label>
-                    <input type="text" id="rtmpServer" value={formState.rtmpServer} onChange={handleChange} placeholder="VD: rtmp://a.rtmp.youtube.com/live2" className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<label htmlFor="rtmpServer" className="block text-sm font-medium text-gray-300 mb-1">RTMP Server <span className="text-red-400">*</span></label>
+						<input 
+							type="text" 
+							id="rtmpServer" 
+							value={formState.rtmpServer} 
+							onChange={handleChange} 
+							placeholder="VD: rtmp://a.rtmp.youtube.com/live2" 
+							className={`w-full px-3 py-2 border ${errors.rtmpServer ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+						/>
+						{errors.rtmpServer && <p className="text-red-400 text-xs mt-1">{errors.rtmpServer}</p>}
+					</div>
+					<div>
+						<label htmlFor="streamKey" className="block text-sm font-medium text-gray-300 mb-1">Stream Key <span className="text-red-400">*</span></label>
+						<input 
+							type="text" 
+							id="streamKey" 
+							value={formState.streamKey} 
+							onChange={handleChange} 
+							placeholder="Nhập khóa luồng bí mật" 
+							className={`w-full px-3 py-2 border ${errors.streamKey ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+						/>
+						{errors.streamKey && <p className="text-red-400 text-xs mt-1">{errors.streamKey}</p>}
+					</div>
                 </div>
-                <div>
-                    <label htmlFor="streamKey" className="block text-sm font-medium text-gray-300 mb-1">Stream Key <span className="text-red-400">*</span></label>
-                    <input type="text" id="streamKey" value={formState.streamKey} onChange={handleChange} placeholder="Nhập khóa luồng" className="w-full px-3 py-2 border border-gray-600 bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition" />
+                <div className="border-t border-gray-700 pt-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-3">Thời Lượng Phát</label>
+                    <div className="space-y-3">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="durationType" 
+                                value="infinite" 
+                                checked={formState.durationType === 'infinite'}
+                                onChange={handleDurationTypeChange}
+                                className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 focus:ring-blue-500"
+                            />
+                            <span className="text-gray-300">Tự động lặp vô hạn</span>
+                        </label>
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="durationType" 
+                                value="custom" 
+                                checked={formState.durationType === 'custom'}
+                                onChange={handleDurationTypeChange}
+                                className="w-4 h-4 text-blue-600 bg-gray-900 border-gray-600 focus:ring-blue-500"
+                            />
+                            <span className="text-gray-300">Thời gian tùy chọn</span>
+                        </label>
+                        
+                        {formState.durationType === 'custom' && (
+                            <div className="ml-7 mt-2">
+                                <label htmlFor="duration" className="block text-sm font-medium text-gray-300 mb-1">
+                                    Thời lượng (phút)
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="duration" 
+                                    min="1"
+                                    value={formState.duration} 
+                                    onChange={handleChange} 
+                                    placeholder="VD: 60" 
+                                    className={`w-full px-3 py-2 border ${errors.duration ? 'border-red-500' : 'border-gray-600'} bg-gray-900 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500 transition`} 
+                                />
+                                {errors.duration && <p className="text-red-400 text-xs mt-1">{errors.duration}</p>}
+                                <p className="text-xs text-gray-500 mt-1">Video sẽ lặp lại cho đến khi hết thời gian</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
             <div className="pt-4 mt-4 border-t border-gray-700 flex-shrink-0">
@@ -90,7 +212,7 @@ const CreateStreamForm = ({ handleSchedule, isScheduling }) => {
 const StreamList = ({ schedules, handleDelete, handleStop }) => (
     <div className="bg-gray-800 rounded-lg p-6 h-full flex flex-col border border-gray-700">
         <h2 className="text-xl font-bold text-gray-100 flex items-center border-b border-gray-700 pb-4 flex-shrink-0">
-            <Calendar className="w-6 h-6 mr-3 text-blue-400" /> Quản lý ({schedules.length})
+            <Calendar className="w-6 h-6 mr-3 text-blue-400" /> Quản lý Luồng ({schedules.length})
         </h2>
         {!schedules.length ? (
             <div className="flex-1 flex items-center justify-center text-gray-500 italic">Chưa có lịch livestream nào.</div>
@@ -100,6 +222,7 @@ const StreamList = ({ schedules, handleDelete, handleStop }) => (
                     const statusDisplay = getStatusDisplay(schedule.status);
                     const canStop = schedule.status === 'LIVE';
                     const canDelete = ['PENDING', 'COMPLETED', 'FAILED'].includes(schedule.status);
+                    const durationText = schedule.durationMinutes ? `${schedule.durationMinutes} phút` : 'Vô hạn';
                     return (
                         <div key={schedule.id} className="p-4 border border-gray-700 rounded-lg bg-gray-900 flex flex-col space-y-4">
                             <div className="flex justify-between items-start">
@@ -112,6 +235,7 @@ const StreamList = ({ schedules, handleDelete, handleStop }) => (
                             <div className="text-sm text-gray-400 space-y-2 border-t border-gray-700/50 pt-3">
                                 <p className="flex items-center"><Clock size={14} className="mr-2 text-gray-500" /> <span className="font-semibold text-gray-300 mr-1">Phát lúc:</span> {formatDateTime(schedule.broadcastDateTime)}</p>
                                 <p className="flex items-center"><Film size={14} className="mr-2 text-gray-500" /> <span className="font-semibold text-gray-300 mr-1">File:</span> <span className="font-mono">{schedule.videoIdentifier}</span></p>
+                                <p className="flex items-center"><Clock size={14} className="mr-2 text-gray-500" /> <span className="font-semibold text-gray-300 mr-1">Thời lượng:</span> {durationText}</p>
                             </div>
                             <div className="flex items-center justify-end space-x-2 pt-2">
                                 {canStop && <button onClick={() => handleStop(schedule.id, schedule.title)} className="font-semibold py-1.5 px-3 rounded-md transition bg-yellow-600 hover:bg-yellow-700 text-white flex items-center text-xs"><StopCircle size={14} className="mr-1.5" /> Dừng</button>}
@@ -161,9 +285,14 @@ const App = () => {
         setIsScheduling(true);
         toast.promise(
             new Promise(resolve => {
-                const { date, time, duration, isDurationCustom, ...rest } = formState;
+                const { date, time, duration, durationType, ...rest } = formState;
                 const combinedDateTime = new Date(`${date}T${time}:00`).toISOString();
-                socket.emit('create_schedule', { ...rest, broadcastDateTime: combinedDateTime, durationMinutes: isDurationCustom ? duration : null });
+                const payload = { 
+                    ...rest, 
+                    broadcastDateTime: combinedDateTime, 
+                    durationMinutes: durationType === 'custom' ? parseInt(duration) : null 
+                };
+                socket.emit('create_schedule', payload);
                 setTimeout(resolve, 500);
             }),
             {
