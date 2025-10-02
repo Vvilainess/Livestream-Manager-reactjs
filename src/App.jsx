@@ -297,7 +297,7 @@ const StreamList = ({ schedules, handleDelete, handleStop }) => {
                             <div key={schedule.id} className="p-4 border border-gray-700 rounded-lg bg-gray-900 flex flex-col space-y-4">
                                 <div className="flex justify-between items-start">
                                     <p className="text-lg font-bold text-gray-100 truncate flex items-center">
-                                        {statusDisplay.icon && <span className="mr-3">{statusDisplay.icon}</span>}
+                                        {statusDisplay.icon && <span className="mr-3 pl-4">{statusDisplay.icon}</span>}
                                         {schedule.title}
                                         {showDebug && pid && (
                                             <span className="ml-2 text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-blue-400">
