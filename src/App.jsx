@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// [SỬA ĐỔI] Thêm icon RefreshCw cho trạng thái RETRYING
 import { Trash2, Calendar, Film, Plus, Loader, StopCircle, Clock, RefreshCw } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import io from 'socket.io-client';
